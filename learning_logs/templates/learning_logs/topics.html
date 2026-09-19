@@ -1,0 +1,122 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block content %}
+{% csrf_token %}
+
+<h2>Topics</h2>
+
+<p>
+  <a href="{% url 'learning_logs:new_topic' %}">Add a new topic</a>
+</p>
+
+<ul style="list-style: none; padding: 0;">
+  {% for topic in topics %}
+    <li id="topic-card-{{ topic.id }}" style="margin-bottom: 12px; padding: 12px; border: 1px solid #e1dfdd; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+      <a href="{% url 'learning_logs:topic' topic.id %}" style="font-weight: 600; text-decoration: none; color: #0078d4;">
+        {{ topic.text }}
+      </a>
+
+      <button type="button" onclick="dissolveAndDeleteTopic({{ topic.id }})" style="background: transparent; border: none; color: #d13438; cursor: pointer; font-weight: 600;">
+        Delete Topic
+      </button>
+    </li>
+  {% empty %}
+    <li>No topics have been added yet.</li>
+  {% endfor %}
+</ul>
+
+<canvas id="dust-canvas" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;"></canvas>
+
+<script>
+  function getCsrfToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) return csrfInput.value;
+    return '';
+  }
+
+  const canvas = document.getElementById('dust-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animating = false;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function dissolveAndDeleteTopic(topicId) {
+    const card = document.getElementById(`topic-card-${topicId}`);
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const density = 40;
+
+    for (let i = 0; i < density; i++) {
+      for (let j = 0; j < density; j++) {
+        if (Math.random() > 0.35) continue;
+
+        particles.push({
+          x: rect.left + (rect.width / density) * i,
+          y: rect.top + (rect.height / density) * j,
+          size: Math.random() * 3 + 1,
+          color: Math.random() > 0.5 ? '#8a8886' : '#d13438',
+          vx: (Math.random() - 0.2) * 3 + 1.5,
+          vy: (Math.random() - 0.5) * 2 - 1,
+          opacity: 1,
+          life: Math.random() * 40 + 20
+        });
+      }
+    }
+
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+
+    fetch(`/delete_topic_ajax/${topicId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrfToken(),
+        'Content-Type': 'application/json',
+      }
+    }).then(response => {
+      if (response.ok) {
+        setTimeout(() => { card.remove(); }, 400);
+      }
+    });
+
+    if (!animating) {
+      animating = true;
+      requestAnimationFrame(renderParticles);
+    }
+  }
+
+  function renderParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.opacity -= 0.025;
+      p.life--;
+
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, p.opacity);
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+
+      if (p.opacity <= 0 || p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+
+    if (particles.length > 0) {
+      requestAnimationFrame(renderParticles);
+    } else {
+      animating = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+</script>
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block content %}
+  <h1 style="font-weight: 600; font-size: 24px; margin-top: 0;">Learning Log</h1>
+  <p style="color: #605e5c; line-height: 1.5; margin-bottom: 24px;">
+    Learning Log helps you keep track of your learning, for any topic you're learning about.
+  </p>
+
+  <!-- Fluent UI Button Link -->
+  <a href="{% url 'learning_logs:topics' %}" class="btn-fluent">
+    Topics
+  </a>
+{% endblock content %}

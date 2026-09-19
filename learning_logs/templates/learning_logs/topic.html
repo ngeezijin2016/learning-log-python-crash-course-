@@ -1,0 +1,142 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block content %}
+
+<p>Topic: {{ topic.text }}</p>
+
+<p>
+  <a href="{% url 'learning_logs:new_entry' topic.id %}">New Entry</a>
+</p>
+
+<p>Entries:</p>
+<ul>
+  {% for entry in entries %}
+    <li>
+      <p>{{ entry.date_added|date:'M d, Y H:i' }}</p>
+      <p>{{ entry.text|linebreaks }}</p>
+
+      <div class="entry-actions">
+        <a href="{% url 'learning_logs:edit_entry' entry.id %}" class="btn-edit">Edit</a>
+        
+        <button type="button" class="btn-dust-delete" onclick="dissolveAndDelete({{ entry.id }})">
+          Delete
+        </button>
+      </div>
+    </li>
+  {% empty %}
+    <li>There are no entries for this topic yet.</li>
+  {% endfor %}
+</ul>
+
+<canvas id="dust-canvas" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;"></canvas>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  const canvas = document.getElementById('dust-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  function dissolveAndDelete(entryId) {
+    const card = document.getElementById(`entry-card-${entryId}`) || event.target.closest('li');
+    if (!card) return;
+
+    const rect = card.getBoundingClientRect();
+    const density = 50;
+
+    for (let i = 0; i < density; i++) {
+      for (let j = 0; j < density; j++) {
+        if (Math.random() > 0.35) continue;
+
+        const x = rect.left + (rect.width / density) * i;
+        const y = rect.top + (rect.height / density) * j;
+
+        particles.push({
+          x: x,
+          y: y,
+          size: Math.random() * 3 + 1,
+          color: Math.random() > 0.5 ? '#8a8886' : '#0078d4',
+          vx: (Math.random() - 0.2) * 3 + 1.5,
+          vy: (Math.random() - 0.5) * 2 - 1,
+          opacity: 1,
+          life: Math.random() * 40 + 20
+        });
+      }
+    }
+
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+
+    fetch(`/delete_entry_ajax/${entryId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Content-Type': 'application/json',
+      }
+    }).then(response => {
+      if (response.ok) {
+        setTimeout(() => {
+          card.remove();
+        }, 500);
+      }
+    });
+
+    if (!animating) {
+      animating = true;
+      requestAnimationFrame(renderParticles);
+    }
+  }
+
+  let animating = false;
+
+  function renderParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.opacity -= 0.025;
+      p.life--;
+
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, p.opacity);
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+
+      if (p.opacity <= 0 || p.life <= 0) {
+        particles.splice(i, 1);
+      }
+    }
+
+    if (particles.length > 0) {
+      requestAnimationFrame(renderParticles);
+    } else {
+      animating = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+</script>
+
+{% endblock content %}
+{% csrf_token %}

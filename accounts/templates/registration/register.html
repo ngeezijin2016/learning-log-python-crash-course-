@@ -1,0 +1,275 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block content %}
+<div class="fluent-bg-wrapper">
+  
+  <div class="fluent-card-3d-wrapper">
+    <div id="register-card" class="fluent-card">
+      
+      <h2 style="font-size: 24px; font-weight: 600; margin: 0 0 4px 0; color: #111827;">Create account</h2>
+      <p style="color: #616161; font-size: 14px; margin: 0 0 20px 0;">Join Learning Log</p>
+
+      <!-- Django Error Notification -->
+      {% if form.errors %}
+        <div class="fluent-error-box">
+          <p style="color: #a80000; font-size: 13px; margin: 0; font-weight: 600;">
+            Please fix the errors below and try again.
+          </p>
+        </div>
+      {% endif %}
+
+      <!-- Fluent Loading Bar -->
+      <div id="fluent-loader" class="fluent-progress-bar" style="display: none;">
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+      </div>
+
+      <form method="post" action="{% url 'accounts:register' %}" id="fluent-register-form">
+        {% csrf_token %}
+
+        <!-- STEP 1: USERNAME -->
+        <div id="step-username" class="step-content">
+          <div class="input-group">
+            <input type="text" name="username" id="id_username" placeholder="Choose a Username" required autofocus class="fluent-input">
+            {% if form.username.errors %}
+              <span class="error-text">{{ form.username.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <button type="button" class="btn-fluent" onclick="transitionToPasswords()" style="width: 100%; cursor: pointer;">
+            Next
+          </button>
+        </div>
+
+        <!-- STEP 2: PASSWORDS -->
+        <div id="step-passwords" class="step-content" style="display: none;">
+          <div class="input-group">
+            <input type="password" name="password1" id="id_password1" placeholder="Password" class="fluent-input">
+            {% if form.password1.errors %}
+              <span class="error-text">{{ form.password1.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div class="input-group">
+            <input type="password" name="password2" id="id_password2" placeholder="Confirm Password" class="fluent-input">
+            {% if form.password2.errors %}
+              <span class="error-text">{{ form.password2.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
+            <button type="button" onclick="transitionToUsername()" class="btn-back">
+              Back
+            </button>
+            <button type="submit" onclick="showLoading()" class="btn-fluent" style="min-width: 120px; cursor: pointer;">
+              Register
+            </button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Dynamic Background Gradient */
+  .fluent-bg-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(-45deg, #0078d4, #002050, #00b7c3, #2b88d8);
+    background-size: 400% 400%;
+    animation: fluentGradient 15s ease infinite;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  @keyframes fluentGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Acrylic Blur Container */
+  .fluent-card-3d-wrapper {
+    perspective: 1000px;
+  }
+
+  .fluent-card {
+    width: 340px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    transform-style: preserve-3d;
+  }
+
+  /* Flip Animation */
+  .flip-down {
+    transform: rotateX(-90deg);
+    opacity: 0;
+  }
+
+  /* Fluent Controls */
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  .fluent-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #8a8886;
+    border-bottom: 2px solid #0078d4;
+    border-radius: 2px;
+    box-sizing: border-box;
+    font-size: 14px;
+    outline: none;
+    background: rgba(255,255,255,0.9);
+    transition: all 0.2s ease;
+  }
+
+  .fluent-input:focus {
+    border-color: #0078d4;
+    box-shadow: 0 0 4px rgba(0, 120, 212, 0.4);
+  }
+
+  .btn-fluent {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-fluent:hover {
+    background-color: #106ebe;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: #0078d4;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  .fluent-error-box {
+    background-color: #fde7e9;
+    border-left: 4px solid #d13438;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 2px;
+  }
+
+  .error-text {
+    color: #d13438;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+  }
+
+  /* Progress Dots */
+  .fluent-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+
+  .progress-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #0078d4;
+    border-radius: 50%;
+    animation: fluentDots 2s infinite ease-in-out;
+    opacity: 0;
+  }
+
+  .progress-dot:nth-child(1) { animation-delay: 0.0s; }
+  .progress-dot:nth-child(2) { animation-delay: 0.15s; }
+  .progress-dot:nth-child(3) { animation-delay: 0.30s; }
+  .progress-dot:nth-child(4) { animation-delay: 0.45s; }
+  .progress-dot:nth-child(5) { animation-delay: 0.60s; }
+
+  @keyframes fluentDots {
+    0% { left: 0%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+  }
+</style>
+
+<script>
+  const hasErrors = {% if form.errors %} true {% else %} false {% endif %};
+  const card = document.getElementById('register-card');
+
+  function transitionToPasswords() {
+    const usernameInput = document.getElementById('id_username');
+    if (!usernameInput.value.trim()) {
+      usernameInput.reportValidity();
+      return;
+    }
+
+    card.classList.add('flip-down');
+
+    setTimeout(() => {
+      document.getElementById('step-username').style.display = 'none';
+      document.getElementById('step-passwords').style.display = 'block';
+
+      card.classList.remove('flip-down');
+      
+      setTimeout(() => {
+        document.getElementById('id_password1').focus();
+      }, 100);
+    }, 300);
+  }
+
+  function transitionToUsername() {
+    card.classList.add('flip-down');
+
+    setTimeout(() => {
+      document.getElementById('step-passwords').style.display = 'none';
+      document.getElementById('step-username').style.display = 'block';
+
+      card.classList.remove('flip-down');
+      document.getElementById('id_username').focus();
+    }, 300);
+  }
+
+  function showLoading() {
+    document.getElementById('fluent-loader').style.display = 'block';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const usernameEl = document.getElementById('id_username');
+    if (usernameEl) {
+      usernameEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          transitionToPasswords();
+        }
+      });
+    }
+
+    if (hasErrors) {
+      document.getElementById('step-username').style.display = 'none';
+      document.getElementById('step-passwords').style.display = 'block';
+    }
+  });
+</script>
+{% endblock content %}

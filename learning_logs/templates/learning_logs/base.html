@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Log</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', SegoeUI, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: #f3f3f3;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Top Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 32px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-links a {
+      color: #0078d4;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      margin-right: 16px;
+    }
+
+    /* Auth Navigation Container */
+    .auth-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Fluent UI Pill Button Base */
+    .user-pill-container {
+      position: relative;
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 20px; /* Pill Shape */
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #242424;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+      text-decoration: none;
+    }
+
+    .user-pill:hover {
+      background: #f5f5f5;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Primary CTA Pill for Register */
+    .user-pill-primary {
+      background: #0078d4;
+      color: #ffffff;
+      border-color: #0078d4;
+    }
+
+    .user-pill-primary:hover {
+      background: #106ebe;
+      color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 120, 212, 0.3);
+    }
+
+    .avatar-icon {
+      width: 20px;
+      height: 20px;
+      background: #0078d4;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    /* Fluent Dropdown Menu */
+    .fluent-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 42px;
+      width: 180px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+      padding: 6px;
+      z-index: 1000;
+    }
+
+    .fluent-dropdown.show {
+      display: block;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .dropdown-btn {
+      width: 100%;
+      background: transparent;
+      border: none;
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #d13438; /* Fluent Red */
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+
+    .dropdown-btn:hover {
+      background: #fde7e9;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-links">
+      <a href="{% url 'learning_logs:index' %}">Home</a>
+      <a href="{% url 'learning_logs:topics' %}">Topics</a>
+    </div>
+
+    <div class="auth-container">
+      {% if user.is_authenticated %}
+        <div class="user-pill-container">
+          <!-- User Profile Pill Button -->
+          <button class="user-pill" onclick="toggleDropdown()">
+            <span class="avatar-icon">{{ user.username|slice:":1"|upper }}</span>
+            <span>{{ user.username }}</span>
+            <span style="font-size: 10px; color: #616161;">▼</span>
+          </button>
+
+          <!-- Dropdown Menu with POST Logout Form -->
+          <div id="userMenu" class="fluent-dropdown">
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-btn">
+                Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <!-- Unauthenticated Guest Options -->
+        <a href="{% url 'accounts:login' %}" class="user-pill">Log in</a>
+        <a href="{% url 'accounts:register' %}" class="user-pill user-pill-primary">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    {% block content %}{% endblock content %}
+  </main>
+
+  <script>
+    function toggleDropdown() {
+      document.getElementById('userMenu').classList.toggle('show');
+    }
+
+    // Close dropdown when clicking anywhere outside
+    window.onclick = function(event) {
+      if (!event.target.closest('.user-pill-container')) {
+        const dropdowns = document.getElementsByClassName("fluent-dropdown");
+        for (let i = 0; i < dropdowns.length; i++) {
+          dropdowns[i].classList.remove('show');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
