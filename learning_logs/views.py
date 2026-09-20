@@ -2,9 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
 from django.views.decorators.http import require_POST
+from django.shortcuts import render
 
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
+
+def google_verification(request):
+    return render(request, 'google200447119fded175.html') # use your exact filename
 
 
 def index(request):
