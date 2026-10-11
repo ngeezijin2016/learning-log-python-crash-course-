@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+*f-+$uv!0=1#9_gqvtq^*e(d6wpf!=1e_-apbh1t8k8&5(@xs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'll_project.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 
@@ -136,8 +136,12 @@ MAILERS = {
 }
 
 # My settings
+# Where to send users after they log in successfully
+LOGIN_REDIRECT_URL = 'learning_logs:index'
+
+# Where to send users after they log out
 LOGIN_REDIRECT_URL = 'learning_logs:index'
 LOGOUT_REDIRECT_URL = 'learning_logs:index'
-LOGIN_URL = 'sign_in.ll'
+LOGIN_URL = 'accounts:login'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

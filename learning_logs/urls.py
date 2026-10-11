@@ -12,4 +12,5 @@ urlpatterns = [
     path('edit_entry/<int:entry_id>/', views.edit_entry, name='edit_entry'),
     path('delete_entry_ajax/<int:entry_id>/', views.delete_entry_ajax, name='delete_entry_ajax'),
     path('delete_topic_ajax/<int:topic_id>/', views.delete_topic_ajax, name='delete_topic_ajax'),
+    path('ll.settings/', views.settings, name='settings'),
 ]

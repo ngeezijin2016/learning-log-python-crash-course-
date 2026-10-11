@@ -123,4 +123,8 @@ def delete_topic_ajax(request, topic_id):
         raise Http404
 
     topic.delete()
-    return JsonResponse({'status': 'success', 'topic_id': topic_id})
+    return JsonResponse({'status': 'success', 'topic_id': topic_id})    
+
+@login_required
+def settings(request):
+    return render(request, 'learning_logs/settings.html')

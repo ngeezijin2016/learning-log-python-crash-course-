@@ -1,0 +1,169 @@
+{% extends 'learning_logs/base.html' %}
+
+{% block content %}
+<style>
+  .fluent-settings-wrapper {
+    max-width: 650px;
+    margin: 30px auto;
+    padding: 0 15px;
+  }
+
+  .fluent-settings-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+  }
+
+  .settings-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: var(--text-primary);
+  }
+
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
+
+  .setting-item-stack p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--card-border);
+    margin: 20px 0;
+  }
+
+  /* Fluent Toggle Switch */
+  .fluent-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+  }
+
+  .fluent-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 22px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #0078d4;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(22px);
+  }
+
+  .btn-danger {
+    background-color: #d13438;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .btn-danger:hover {
+    background-color: #a80000;
+  }
+</style>
+
+<div class="fluent-settings-wrapper">
+  
+  <div class="fluent-settings-card">
+    <h1 style="font-size: 26px; font-weight: 600; margin: 0 0 8px 0;">Settings</h1>
+    <p style="color: var(--text-secondary); font-size: 14px; margin: 0 0 24px 0;">Manage your application preferences and account options.</p>
+
+    <!-- Section 1: Appearance -->
+    <div class="settings-section">
+      <h3>Appearance</h3>
+      <div class="setting-item">
+        <div>
+          <strong>Dark Mode</strong>
+          <p style="font-size: 12px; color: var(--text-secondary); margin: 2px 0 0 0;">Toggle fluent design theme color scheme.</p>
+        </div>
+        <label class="fluent-toggle">
+          <input type="checkbox" id="settings-theme-toggle" onchange="toggleTheme()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 2: Account Details -->
+    <div class="settings-section">
+      <h3>Account Details</h3>
+      <div class="setting-item-stack">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <p><strong>Status:</strong> Active</p>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Section 3: Danger Zone -->
+    <div class="settings-section danger-zone">
+      <h3 style="color: #d13438;">Danger Zone</h3>
+      <div class="setting-item">
+        <div>
+          <strong>Sign Out</strong>
+          <p style="font-size: 12px; color: var(--text-secondary); margin: 2px 0 0 0;">Log out of your current session.</p>
+        </div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger">Log Out</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // Sync toggle state on settings page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const toggle = document.getElementById('settings-theme-toggle');
+    if (toggle) toggle.checked = isDark;
+  });
+</script>
+{% endblock content %}
