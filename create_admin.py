@@ -1,7 +1,7 @@
 import os
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "learning_log.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ll_project.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model

@@ -76,6 +76,8 @@
     card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     card.style.opacity = '0';
     card.style.transform = 'scale(0.95)';
+    const button = card.querySelector('button');
+    if (button) button.disabled = true;
 
     fetch(`/delete_topic_ajax/${topicId}/`, {
       method: 'POST',
@@ -84,9 +86,13 @@
         'Content-Type': 'application/json',
       }
     }).then(response => {
-      if (response.ok) {
-        setTimeout(() => { card.remove(); }, 400);
-      }
+      if (!response.ok) throw new Error('Topic deletion failed.');
+      setTimeout(() => { card.remove(); }, 400);
+    }).catch(() => {
+      card.style.opacity = '';
+      card.style.transform = '';
+      if (button) button.disabled = false;
+      window.alert('Could not delete this topic. Please try again.');
     });
 
     if (!animating) {

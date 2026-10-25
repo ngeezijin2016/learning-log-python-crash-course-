@@ -18,7 +18,7 @@
       <div class="entry-actions">
         <a href="{% url 'learning_logs:edit_entry' entry.id %}" class="btn-edit">Edit</a>
         
-        <button type="button" class="btn-dust-delete" onclick="dissolveAndDelete({{ entry.id }})">
+        <button type="button" class="btn-dust-delete" onclick="dissolveAndDelete({{ entry.id }}, this)">
           Delete
         </button>
       </div>
@@ -57,8 +57,8 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  function dissolveAndDelete(entryId) {
-    const card = document.getElementById(`entry-card-${entryId}`) || event.target.closest('li');
+  function dissolveAndDelete(entryId, button) {
+    const card = button.closest('li');
     if (!card) return;
 
     const rect = card.getBoundingClientRect();
@@ -87,6 +87,7 @@
     card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     card.style.opacity = '0';
     card.style.transform = 'scale(0.95)';
+    button.disabled = true;
 
     fetch(`/delete_entry_ajax/${entryId}/`, {
       method: 'POST',
@@ -95,11 +96,15 @@
         'Content-Type': 'application/json',
       }
     }).then(response => {
-      if (response.ok) {
-        setTimeout(() => {
-          card.remove();
-        }, 500);
-      }
+      if (!response.ok) throw new Error('Entry deletion failed.');
+      setTimeout(() => {
+        card.remove();
+      }, 500);
+    }).catch(() => {
+      card.style.opacity = '';
+      card.style.transform = '';
+      button.disabled = false;
+      window.alert('Could not delete this entry. Please try again.');
     });
 
     if (!animating) {
