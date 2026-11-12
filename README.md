@@ -31,3 +31,7 @@ not remove it from repository history.
 $env:DJANGO_SECRET_KEY = "test-only-secret-key"
 python manage.py test
 ```
+
+## Learn more
+
+https://sites.google.com/view/learning-log-launcher
