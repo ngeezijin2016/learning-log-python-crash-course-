@@ -2,13 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
 from django.views.decorators.http import require_POST
-from django.shortcuts import render
 
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
-
-def google_verification(request):
-    return render(request, 'google200447119fded175.html') # use your exact filename
 
 
 def index(request):
@@ -28,7 +24,7 @@ def topics(request):
 def topic(request, topic_id):
     """Show a single topic and all its entries."""
     topic = get_object_or_404(Topic, id=topic_id)
-    
+
     # Make sure the topic belongs to the current user
     if topic.owner != request.user:
         raise Http404
@@ -61,7 +57,7 @@ def new_topic(request):
 def new_entry(request, topic_id):
     """Add a new entry for a particular topic."""
     topic = get_object_or_404(Topic, id=topic_id)
-    
+
     if topic.owner != request.user:
         raise Http404
 
@@ -105,25 +101,27 @@ def edit_entry(request, entry_id):
 def delete_entry_ajax(request, entry_id):
     """Delete an entry asynchronously for the dust particle animation."""
     entry = get_object_or_404(Entry, id=entry_id)
-    
+
     if entry.topic.owner != request.user:
         raise Http404
 
     entry.delete()
     return JsonResponse({'status': 'success', 'entry_id': entry_id})
 
+
 @login_required
 @require_POST
 def delete_topic_ajax(request, topic_id):
     """Delete an entire topic and its entries asynchronously."""
     topic = get_object_or_404(Topic, id=topic_id)
-    
+
     # Strict ownership check
     if topic.owner != request.user:
         raise Http404
 
     topic.delete()
-    return JsonResponse({'status': 'success', 'topic_id': topic_id})    
+    return JsonResponse({'status': 'success', 'topic_id': topic_id})
+
 
 @login_required
 def settings(request):
